@@ -1,0 +1,14 @@
+name: wonjd-db
+version: 1.0.0
+description: >-
+  Direct read-only CRM DB tools for Hermes Workspace (bypasses stdio MCP).
+  Uses project db/query.py — SELECT-only, .env.local connection.
+author: wonjd-db-chat-bot
+provides_tools:
+  - wonjd_db_query
+  - wonjd_db_list_tables
+config_schema:
+  project_root:
+    type: str
+    default: ""
+    description: Absolute path to WONJD_DB_CHAT_BOT (set by npm run mcp:install)

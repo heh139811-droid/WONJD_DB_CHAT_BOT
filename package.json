@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Local DB + vault RAG chatbot on Hermes Workspace",
   "scripts": {
-    "start:all": "node scripts/start-all.mjs",
+    "start:all": "node scripts/start-all-full.mjs",
     "start:gateway": "hermes gateway run",
     "start:dashboard": "node scripts/start-dashboard.mjs",
     "setup:hermes-path": "powershell -ExecutionPolicy Bypass -File scripts/setup-hermes-path.ps1",
@@ -13,7 +13,8 @@
     "db:check": "uv run db/check_conn.py",
     "db:query": "uv run db/query.py",
     "mcp:install": "node scripts/install-mcp.mjs",
-    "mcp:test": "hermes mcp test wonjd-db"
+    "mcp:test": "hermes mcp test wonjd-db",
+    "hermes:install": "node scripts/install-mcp.mjs"
   },
   "engines": {
     "node": ">=18"

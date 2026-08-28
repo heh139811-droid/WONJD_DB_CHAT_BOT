@@ -1,10 +1,11 @@
-// Register wonjd-db MCP with Hermes (writes ~/.hermes/config.yaml).
+// Register wonjd-db with Hermes: MCP (dashboard/TUI) + native plugin (Workspace).
 
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { installPluginLink, pluginDest, upsertApiServerToolsets, upsertPlugins } from './install-plugin.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -48,16 +49,7 @@ function upsertMcpServer(text) {
   return text.trimEnd() + `\n\n${block}\n`
 }
 
-function upsertApiServerToolsets(text) {
-  const entry = '    - mcp-wonjd-db'
-  if (text.includes('mcp-wonjd-db')) return text
-  const match = text.match(/^  api_server:\n([\s\S]*?)(?=^\S)/m)
-  if (!match) return text
-  const lines = match[1].trimEnd()
-  return text.replace(match[0], `  api_server:\n${lines}\n${entry}\n`)
-}
-
-console.log('[1/4] uv sync')
+console.log('[1/5] uv sync')
 run(uv, ['sync'], { cwd: ROOT })
 
 if (!fs.existsSync(venvPython)) {
@@ -65,17 +57,24 @@ if (!fs.existsSync(venvPython)) {
   process.exit(1)
 }
 
-console.log('\n[2/4] update config.yaml')
+console.log('\n[2/5] install wonjd-db Hermes plugin')
+installPluginLink()
+
+console.log('\n[3/5] update config.yaml')
 let text = fs.readFileSync(configPath, 'utf8')
 text = upsertMcpServer(text)
 text = upsertApiServerToolsets(text)
+text = upsertPlugins(text)
 fs.writeFileSync(configPath, text, 'utf8')
 console.log(`updated ${configPath}`)
+console.log('  api_server toolset: wonjd-db (native plugin, replaces mcp-wonjd-db)')
 
-console.log('\n[3/4] hermes mcp test wonjd-db')
-run('hermes', ['mcp', 'test', 'wonjd-db'])
+console.log('\n[4/5] hermes plugins doctor wonjd-db')
+run('hermes', ['plugins', 'doctor', pluginDest, '--ci'])
 
-console.log('\n[4/4] hermes gateway restart')
+console.log('\n[5/5] hermes gateway restart')
 run('hermes', ['gateway', 'restart'])
 
 console.log('\nDone.')
+console.log('Workspace: wonjd_db_query / wonjd_db_list_tables (plugin)')
+console.log('Dashboard: mcp wonjd-db still registered for TUI sessions')
