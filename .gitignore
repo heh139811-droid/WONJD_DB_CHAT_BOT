@@ -1,0 +1,40 @@
+# 자격증명 — 절대 커밋 금지
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+crm_deploy*
+
+# DB 덤프 / 백업 — PII 포함
+backup/
+*.sql
+*.sql.gz
+*.dump
+
+# 인덱싱 산출물 (재생성 가능)
+.index/
+.qdrant_storage/
+.hf_cache/
+
+# 스키마 스냅샷 (재생성 가능)
+schema_snapshot/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

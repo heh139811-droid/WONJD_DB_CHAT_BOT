@@ -1,0 +1,20 @@
+# Hermes MCP server snippet — merge into %LOCALAPPDATA%/hermes/config.yaml under mcp_servers:
+#
+#   wonjd-db:
+#     command: C:/Users/PC/AppData/Local/hermes/bin/uv.exe
+#     args:
+#       - run
+#       - C:/Users/PC/Documents/WONJD_DB_CHAT_BOT/wonjd_mcp/server.py
+#     enabled: true
+#     connect_timeout: 60
+#     tools:
+#       include: [db_query, db_list_tables]
+#
+# platform_toolsets.api_server (add mcp-wonjd-db):
+#   - session_search
+#   - todo
+#   - mcp-wonjd-db
+#
+# Install:
+#   npm run mcp:install
+#   hermes gateway restart

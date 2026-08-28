@@ -1,0 +1,21 @@
+{
+  "name": "wonjd-db-chat-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local DB + vault RAG chatbot on Hermes Workspace",
+  "scripts": {
+    "start:all": "node scripts/start-all.mjs",
+    "start:gateway": "hermes gateway run",
+    "start:dashboard": "node scripts/start-dashboard.mjs",
+    "setup:hermes-path": "powershell -ExecutionPolicy Bypass -File scripts/setup-hermes-path.ps1",
+    "start:workspace": "node scripts/start-workspace.mjs",
+    "db:check": "uv run db/check_conn.py",
+    "db:query": "uv run db/query.py",
+    "mcp:install": "node scripts/install-mcp.mjs",
+    "mcp:test": "hermes mcp test wonjd-db"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
