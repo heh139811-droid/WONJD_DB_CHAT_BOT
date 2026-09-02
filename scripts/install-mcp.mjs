@@ -1,11 +1,19 @@
-// Register wonjd-db with Hermes: MCP (dashboard/TUI) + native plugin (Workspace).
+// Register wonjd-db + wonjd-wireframe with Hermes (MCP + native plugins).
 
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { installPluginLink, pluginDest, upsertApiServerToolsets, upsertPlugins } from './install-plugin.mjs'
+import {
+  configPath,
+  dbPluginDest,
+  installPluginLinks,
+  upsertApiServerToolsets,
+  upsertPlugins,
+  wireframePluginDest,
+  WIREFRAME_ROOT,
+} from './install-plugin.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -14,7 +22,6 @@ const SERVER = path.join(ROOT, 'wonjd_mcp', 'server.py').replace(/\\/g, '/')
 const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local')
 const uv = path.join(localAppData, 'hermes', 'bin', 'uv.exe')
 const hermesHome = process.env.HERMES_HOME || path.join(localAppData, 'hermes')
-const configPath = path.join(hermesHome, 'config.yaml')
 const venvPython =
   process.platform === 'win32'
     ? path.join(ROOT, '.venv', 'Scripts', 'python.exe')
@@ -49,7 +56,7 @@ function upsertMcpServer(text) {
   return text.trimEnd() + `\n\n${block}\n`
 }
 
-console.log('[1/5] uv sync')
+console.log('[1/6] uv sync')
 run(uv, ['sync'], { cwd: ROOT })
 
 if (!fs.existsSync(venvPython)) {
@@ -57,24 +64,34 @@ if (!fs.existsSync(venvPython)) {
   process.exit(1)
 }
 
-console.log('\n[2/5] install wonjd-db Hermes plugin')
-installPluginLink()
+console.log('\n[2/6] build wireframe CLI')
+const wfCli = path.join(WIREFRAME_ROOT, 'packages', 'cli')
+if (fs.existsSync(wfCli)) {
+  run('npm', ['run', 'build'], { cwd: wfCli, shell: true })
+} else {
+  console.warn(`skip wireframe cli build — missing ${wfCli}`)
+}
 
-console.log('\n[3/5] update config.yaml')
+console.log('\n[3/6] install Hermes plugins (wonjd-db + wonjd-wireframe)')
+installPluginLinks()
+
+console.log('\n[4/6] update config.yaml')
 let text = fs.readFileSync(configPath, 'utf8')
 text = upsertMcpServer(text)
 text = upsertApiServerToolsets(text)
 text = upsertPlugins(text)
 fs.writeFileSync(configPath, text, 'utf8')
 console.log(`updated ${configPath}`)
-console.log('  api_server toolset: wonjd-db (native plugin, replaces mcp-wonjd-db)')
+console.log('  api_server: wonjd-db, wonjd-wireframe')
 
-console.log('\n[4/5] hermes plugins doctor wonjd-db')
-run('hermes', ['plugins', 'doctor', pluginDest, '--ci'])
+console.log('\n[5/6] hermes plugins doctor')
+run('hermes', ['plugins', 'doctor', dbPluginDest, '--ci'])
+run('hermes', ['plugins', 'doctor', wireframePluginDest, '--ci'])
 
-console.log('\n[5/5] hermes gateway restart')
+console.log('\n[6/6] hermes gateway restart')
 run('hermes', ['gateway', 'restart'])
 
 console.log('\nDone.')
-console.log('Workspace: wonjd_db_query / wonjd_db_list_tables (plugin)')
-console.log('Dashboard: mcp wonjd-db still registered for TUI sessions')
+console.log('Workspace tools:')
+console.log('  wonjd_db_query / wonjd_db_list_tables')
+console.log('  wonjd_prd_save / wonjd_prd_list / wonjd_wireframe_build / wonjd_wireframe_render')
